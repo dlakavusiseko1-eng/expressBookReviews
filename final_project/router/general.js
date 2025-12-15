@@ -105,9 +105,96 @@ public_users.get('/isbn-promise/:isbn', function (req, res) {
     return res.status(500).json({message: "Error fetching book by ISBN", error: error.message});
   });
 });
+
+// Task 12: Get book details based on Author using async/await with Promises  
+public_users.get('/author/:author', async function (req, res) {
+  try {
+    const author = req.params.author;
+    
+    // Create a promise to simulate async author search
+    const getBooksByAuthor = () => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          let matchingBooks = [];
+          const isbns = Object.keys(books);
+          
+          for (let isbn of isbns) {
+            if (books[isbn].author.toLowerCase().includes(author.toLowerCase())) {
+              matchingBooks.push({
+                isbn: isbn,
+                title: books[isbn].title,
+                author: books[isbn].author,
+                reviews: books[isbn].reviews
+              });
+            }
+          }
+          
+          if (matchingBooks.length > 0) {
+            resolve({ booksbyauthor: matchingBooks });
+          } else {
+            reject(new Error("No books found by this author"));
+          }
+        }, 100);
+      });
+    };
+    
+    // Await the promise
+    const result = await getBooksByAuthor();
+    
+    // Return matching books with neat formatting
+    const formattedResult = JSON.stringify(result, null, 2);
+    return res.status(200).type('json').send(formattedResult);
+    
+  } catch (error) {
+    if (error.message === "No books found by this author") {
+      return res.status(404).json({message: "No books found by this author"});
+    }
+    return res.status(500).json({message: "Error fetching books by author", error: error.message});
+  }
+});
+
+// Alternative implementation using Promise callbacks for author search
+public_users.get('/author-promise/:author', function (req, res) {
+  const author = req.params.author;
   
-// Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+  // Using Promise with .then() and .catch()
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      let matchingBooks = [];
+      const isbns = Object.keys(books);
+      
+      for (let isbn of isbns) {
+        if (books[isbn].author.toLowerCase().includes(author.toLowerCase())) {
+          matchingBooks.push({
+            isbn: isbn,
+            title: books[isbn].title,
+            author: books[isbn].author,
+            reviews: books[isbn].reviews
+          });
+        }
+      }
+      
+      if (matchingBooks.length > 0) {
+        resolve({ booksbyauthor: matchingBooks });
+      } else {
+        reject(new Error("No books found by this author"));
+      }
+    }, 100);
+  })
+  .then(result => {
+    const formattedResult = JSON.stringify(result, null, 2);
+    return res.status(200).type('json').send(formattedResult);
+  })
+  .catch(error => {
+    if (error.message === "No books found by this author") {
+      return res.status(404).json({message: "No books found by this author"});
+    }
+    return res.status(500).json({message: "Error fetching books by author", error: error.message});
+  });
+});
+
+// Original synchronous implementation kept for reference
+public_users.get('/author-sync/:author', function (req, res) {
   const author = req.params.author;
   let matchingBooks = [];
   const isbns = Object.keys(books);
