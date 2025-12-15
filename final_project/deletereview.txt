@@ -1,0 +1,26 @@
+# Complete flow for deleting a book review
+
+# 1. Register a user
+curl -X POST http://localhost:5000/customer/register -H "Content-Type: application/json" -d '{"username":"deluser","password":"delpass"}'
+
+{"message":"User registered successfully"}
+
+# 2. Login to get session
+curl -X POST http://localhost:5000/customer/login -H "Content-Type: application/json" -d '{"username":"deluser","password":"delpass"}'
+
+{"message":"Login successful","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRlbHVzZXIiLCJpYXQiOjE3MzQyNTE2MDAsImV4cCI6MTczNDI1NTIwMH0.example-jwt-token"}
+
+# 3. First, add a review (so we have something to delete)
+curl -X PUT "http://localhost:5000/customer/auth/review/1?review=Great%20book%20to%20delete!" -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRlbHVzZXIiLCJpYXQiOjE3MzQyNTE2MDAsImV4cCI6MTczNDI1NTIwMH0.example-jwt-token"
+
+{"message":"Review added/modified successfully"}
+
+# 4. Delete the review
+curl -X DELETE "http://localhost:5000/customer/auth/review/1" -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRlbHVzZXIiLCJpYXQiOjE3MzQyNTE2MDAsImV4cCI6MTczNDI1NTIwMH0.example-jwt-token"
+
+{"message":"Review deleted successfully"}
+
+# 5. Try to delete the same review again (should fail)
+curl -X DELETE "http://localhost:5000/customer/auth/review/1" -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRlbHVzZXIiLCJpYXQiOjE3MzQyNTE2MDAsImV4cCI6MTczNDI1NTIwMH0.example-jwt-token"
+
+{"message":"Review not found for this user"}

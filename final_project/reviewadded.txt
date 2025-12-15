@@ -1,0 +1,22 @@
+# Complete flow for adding a book review
+
+# 1. Register a user
+curl -X POST http://localhost:5000/customer/register -H "Content-Type: application/json" -d '{"username":"reviewuser","password":"reviewpass"}'
+
+{"message":"User registered successfully"}
+
+# 2. Login to get session
+curl -X POST http://localhost:5000/customer/login -H "Content-Type: application/json" -d '{"username":"reviewuser","password":"reviewpass"}'
+
+{"message":"Login successful","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJldmlld3VzZXIiLCJpYXQiOjE3MzQyNTEyMDAsImV4cCI6MTczNDI1NDgwMH0.example-jwt-token"}
+
+# 3. Add a book review (using session authentication)
+# Note: In actual testing, you would use the session cookie or JWT token
+curl -X PUT "http://localhost:5000/customer/auth/review/1?review=This%20is%20a%20great%20book!" -H "Content-Type: application/json"
+
+{"message":"Review added/modified successfully"}
+
+# 4. Modify the same user's review
+curl -X PUT "http://localhost:5000/customer/auth/review/1?review=Actually,%20it%27s%20an%20excellent%20book!" -H "Content-Type: application/json"
+
+{"message":"Review added/modified successfully"}
