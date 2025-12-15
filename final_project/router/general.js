@@ -218,8 +218,95 @@ public_users.get('/author-sync/:author', function (req, res) {
   }
 });
 
-// Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+// Task 13: Get book details based on Title using async/await with Promises
+public_users.get('/title/:title', async function (req, res) {
+  try {
+    const title = req.params.title;
+    
+    // Create a promise to simulate async title search
+    const getBooksByTitle = () => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          let matchingBooks = [];
+          const isbns = Object.keys(books);
+          
+          for (let isbn of isbns) {
+            if (books[isbn].title.toLowerCase().includes(title.toLowerCase())) {
+              matchingBooks.push({
+                isbn: isbn,
+                title: books[isbn].title,
+                author: books[isbn].author,
+                reviews: books[isbn].reviews
+              });
+            }
+          }
+          
+          if (matchingBooks.length > 0) {
+            resolve({ booksbytitle: matchingBooks });
+          } else {
+            reject(new Error("No books found with this title"));
+          }
+        }, 100);
+      });
+    };
+    
+    // Await the promise
+    const result = await getBooksByTitle();
+    
+    // Return matching books with neat formatting
+    const formattedResult = JSON.stringify(result, null, 2);
+    return res.status(200).type('json').send(formattedResult);
+    
+  } catch (error) {
+    if (error.message === "No books found with this title") {
+      return res.status(404).json({message: "No books found with this title"});
+    }
+    return res.status(500).json({message: "Error fetching books by title", error: error.message});
+  }
+});
+
+// Alternative implementation using Promise callbacks for title search
+public_users.get('/title-promise/:title', function (req, res) {
+  const title = req.params.title;
+  
+  // Using Promise with .then() and .catch()
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      let matchingBooks = [];
+      const isbns = Object.keys(books);
+      
+      for (let isbn of isbns) {
+        if (books[isbn].title.toLowerCase().includes(title.toLowerCase())) {
+          matchingBooks.push({
+            isbn: isbn,
+            title: books[isbn].title,
+            author: books[isbn].author,
+            reviews: books[isbn].reviews
+          });
+        }
+      }
+      
+      if (matchingBooks.length > 0) {
+        resolve({ booksbytitle: matchingBooks });
+      } else {
+        reject(new Error("No books found with this title"));
+      }
+    }, 100);
+  })
+  .then(result => {
+    const formattedResult = JSON.stringify(result, null, 2);
+    return res.status(200).type('json').send(formattedResult);
+  })
+  .catch(error => {
+    if (error.message === "No books found with this title") {
+      return res.status(404).json({message: "No books found with this title"});
+    }
+    return res.status(500).json({message: "Error fetching books by title", error: error.message});
+  });
+});
+
+// Original synchronous implementation (kept for compatibility)
+public_users.get('/title-sync/:title', function (req, res) {
   const title = req.params.title;
   let matchingBooks = [];
   const isbns = Object.keys(books);
