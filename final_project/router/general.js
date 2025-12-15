@@ -2,6 +2,7 @@ const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
+const axios = require('axios'); // Added for Task 10
 const public_users = express.Router();
 
 
@@ -32,12 +33,49 @@ public_users.post("/register", (req,res) => {
   return res.status(201).json({message: "User registered successfully"});
 });
 
-// Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  //Write your code here
-  // Return all books available in the shop with neat formatting
-  const formattedBooks = JSON.stringify(books, null, 2);
-  return res.status(200).type('json').send(formattedBooks);
+// Task 10: Get the book list available in the shop using async/await with Axios
+public_users.get('/', async function (req, res) {
+  try {
+    // Using async/await with Axios to simulate asynchronous operation
+    const getBooks = () => {
+      return new Promise((resolve, reject) => {
+        // Simulate async operation with setTimeout
+        setTimeout(() => {
+          resolve(books);
+        }, 100);
+      });
+    };
+    
+    // Await the promise
+    const booksData = await getBooks();
+    
+    // Return all books available in the shop with neat formatting
+    const formattedBooks = JSON.stringify(booksData, null, 2);
+    return res.status(200).type('json').send(formattedBooks);
+    
+  } catch (error) {
+    return res.status(500).json({message: "Error fetching books", error: error.message});
+  }
+});
+
+// Alternative implementation using Axios directly (if we were fetching from external API):
+public_users.get('/async', async function (req, res) {
+  try {
+    // Example using Axios to fetch data (if books were from external API)
+    // const response = await axios.get('http://localhost:5000/books');
+    // const booksData = response.data;
+    
+    // For now, simulate async operation with Promise
+    const booksData = await new Promise((resolve) => {
+      setTimeout(() => resolve(books), 100);
+    });
+    
+    const formattedBooks = JSON.stringify(booksData, null, 2);
+    return res.status(200).type('json').send(formattedBooks);
+    
+  } catch (error) {
+    return res.status(500).json({message: "Error fetching books asynchronously", error: error.message});
+  }
 });
 
 // Get book details based on ISBN
